@@ -1,91 +1,42 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { Scanner } from '@yudiel/react-qr-scanner'
 
 export default function ScanPage() {
   const [scanned, setScanned] = useState<{name:string, time:string}[]>([])
   const [lastScan, setLastScan] = useState<{name:string, ok:boolean, msg:string} | null>(null)
   const [scanning, setScanning] = useState(false)
   const [error, setError] = useState('')
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const controlsRef = useRef<any>(null)
   const router = useRouter()
   const params = useParams()
   const searchParams = useSearchParams()
   const groupId = params.id as string
   const sessionId = searchParams.get('sessionId') as string
-  const scannedTokens = useRef<Set<string>>(new Set())
+  const scannedTokens = new Set<string>()
 
-  useEffect(() => {
-    return () => { stopScanner() }
-  }, [])
+  async function handleScan(result: any) {
+    const token = result[0]?.rawValue
+    if (!token || scannedTokens.has(token)) return
+    scannedTokens.add(token)
 
-  async function startScanner() {
-    setError('')
-    try {
-      const { BrowserMultiFormatReader } = await import('@zxing/browser')
-      const reader = new BrowserMultiFormatReader()
+    const res = await fetch(`/api/sessions/${sessionId}/scan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ qrToken: token })
+    })
+    const data = await res.json()
+    const time = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
 
-      setTimeout(() => {
-  if (videoRef.current) {
-    videoRef.current.style.display = 'none'
-    videoRef.current.offsetHeight
-    videoRef.current.style.display = 'block'
-  }
-}, 500)
-
-      const devices = await BrowserMultiFormatReader.listVideoInputDevices()
-      if (!devices.length) { setError('No se encontró cámara'); return }
-
-      const backCamera = devices.find(d =>
-        d.label.toLowerCase().includes('back') ||
-        d.label.toLowerCase().includes('rear') ||
-        d.label.toLowerCase().includes('trasera')
-      )
-      const deviceId = backCamera?.deviceId || devices[devices.length - 1].deviceId
-
-      setScanning(true)
-
-      controlsRef.current = await reader.decodeFromVideoDevice(
-        deviceId,
-        videoRef.current!,
-        async (result, err) => {
-          if (!result) return
-          const token = result.getText()
-          if (scannedTokens.current.has(token)) return
-          scannedTokens.current.add(token)
-
-          const res = await fetch(`/api/sessions/${sessionId}/scan`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ qrToken: token })
-          })
-          const data = await res.json()
-          const time = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
-
-          if (res.ok) {
-            setScanned(prev => [{ name: data.student, time }, ...prev])
-            setLastScan({ name: data.student, ok: true, msg: 'Asistencia registrada' })
-          } else {
-            setLastScan({ name: data.error, ok: false, msg: data.error })
-            scannedTokens.current.delete(token)
-          }
-          setTimeout(() => setLastScan(null), 3000)
-        }
-      )
-    } catch (e: any) {
-      setError('No se pudo acceder a la cámara. Verifica los permisos.')
-      setScanning(false)
+    if (res.ok) {
+      setScanned(prev => [{ name: data.student, time }, ...prev])
+      setLastScan({ name: data.student, ok: true, msg: 'Asistencia registrada' })
+    } else {
+      setLastScan({ name: data.error, ok: false, msg: data.error })
+      scannedTokens.delete(token)
     }
-  }
-
-  function stopScanner() {
-    if (controlsRef.current) {
-      controlsRef.current.stop()
-      controlsRef.current = null
-    }
-    setScanning(false)
+    setTimeout(() => setLastScan(null), 3000)
   }
 
   return (
@@ -117,38 +68,23 @@ export default function ScanPage() {
           <div className="p-8 text-center">
             <div className="text-5xl mb-3">📷</div>
             <p className="text-gray-500 text-sm mb-5">
-              Activa la cámara trasera para escanear los QR de tus alumnos
+              Activa la cámara para escanear los QR de tus alumnos
             </p>
-            <button onClick={startScanner}
+            <button onClick={() => setScanning(true)}
               className="bg-blue-600 text-white px-8 py-3 rounded-xl font-medium hover:bg-blue-700 transition">
               Activar cámara
             </button>
           </div>
         ) : (
           <div className="relative">
-            <video
-  ref={videoRef}
-  autoPlay
-  playsInline
-  muted
-  className="w-full"
-  style={{
-    height: '320px',
-    objectFit: 'cover',
-    background: '#000',
-    display: 'block',
-    transform: 'scaleX(1)'
-  }}
-  onLoadedMetadata={(e) => {
-    const v = e.target as HTMLVideoElement
-    v.play()
-  }}
-/>
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-52 h-52 border-2 border-white rounded-2xl opacity-70" />
-            </div>
-            <button onClick={stopScanner}
-              className="absolute top-3 right-3 bg-black bg-opacity-50 text-white text-xs px-3 py-1.5 rounded-lg">
+            <Scanner
+              onScan={handleScan}
+              onError={(e) => setError('Error de cámara: ' + e)}
+              constraints={{ facingMode: 'environment' }}
+              styles={{ container: { width: '100%', height: '320px' } }}
+            />
+            <button onClick={() => setScanning(false)}
+              className="absolute top-3 right-3 bg-black bg-opacity-50 text-white text-xs px-3 py-1.5 rounded-lg z-10">
               Detener
             </button>
           </div>
