@@ -52,7 +52,8 @@ export default function StudentPage() {
   const urgent = timeLeft < 60
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 max-w-xl mx-auto">
+    <main className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-4">
+      <div className="w-full max-w-sm">
       <div className="flex items-center justify-between mb-6 pt-4">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">{userName || 'Alumno'}</h1>
@@ -112,6 +113,7 @@ export default function StudentPage() {
             ))}
           </div>
         )}
+      </div>
       </div>
     </main>
   )

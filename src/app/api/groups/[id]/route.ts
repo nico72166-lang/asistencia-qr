@@ -32,3 +32,19 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   return Response.json(group)
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const user = getUser(req)
+  if (!user || user.role !== 'TEACHER') {
+    return Response.json({ error: 'No autorizado' }, { status: 401 })
+  }
+
+  const { id } = await params
+
+  await prisma.attendance.deleteMany({ where: { session: { groupId: id } } })
+  await prisma.session.deleteMany({ where: { groupId: id } })
+  await prisma.groupMember.deleteMany({ where: { groupId: id } })
+  await prisma.group.delete({ where: { id } })
+
+  return Response.json({ ok: true })
+}

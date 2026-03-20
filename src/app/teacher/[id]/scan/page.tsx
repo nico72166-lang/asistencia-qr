@@ -40,7 +40,8 @@ export default function ScanPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 max-w-xl mx-auto">
+    <main className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-4">
+      <div className="w-full max-w-sm">
       <div className="flex items-center justify-between mb-4 pt-4">
         <h1 className="text-xl font-semibold text-gray-900">Tomar asistencia</h1>
         <Link href={`/teacher/${groupId}`}
@@ -116,6 +117,7 @@ export default function ScanPage() {
         className="w-full bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 transition">
         Finalizar sesión
       </button>
+      </div>
     </main>
   )
 }
