@@ -71,10 +71,16 @@ export default function TeacherPage() {
             <h1 className="text-xl font-semibold text-gray-900">Mis grupos</h1>
             <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Docente</span>
           </div>
-          <button onClick={logout}
-            className="text-sm text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100">
-            Salir
-          </button>
+          <div className="flex gap-2">
+            <Link href="/profile"
+              className="text-sm text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100">
+              👤 Perfil
+            </Link>
+            <button onClick={logout}
+              className="text-sm text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100">
+              Salir
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-3 mb-6">

@@ -14,8 +14,8 @@ export default async function HomePage() {
           <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">
             📋
           </div>
-          <h1 className="text-2xl font-semibold text-gray-900">AsistenciaQR</h1>
-          <p className="text-gray-500 text-sm mt-1">Registro de asistencia por código QR</p>
+            <h1 className="text-2xl font-semibold text-gray-900">Quickster</h1>
+            <p className="text-gray-500 text-sm mt-1">Registro de asistencia por código QR</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-3">
           <Link href="/auth/login"

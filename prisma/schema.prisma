@@ -18,6 +18,7 @@ model User {
   email       String        @unique
   password    String
   role        Role          @default(STUDENT)
+  avatar      String?
   createdAt   DateTime      @default(now())
   teacherGroups Group[]     @relation("TeacherGroups")
   memberships GroupMember[]

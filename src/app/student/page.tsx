@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import QRCode from 'react-qr-code'
+import Link from 'next/link'
 
 export default function StudentPage() {
   const [qrToken, setQrToken] = useState('')
@@ -59,10 +60,16 @@ export default function StudentPage() {
           <h1 className="text-xl font-semibold text-gray-900">{userName || 'Alumno'}</h1>
           <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">Alumno</span>
         </div>
-        <button onClick={logout}
-          className="text-sm text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100">
-          Salir
-        </button>
+        <div className="flex gap-2">
+          <Link href="/profile"
+            className="text-sm text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100">
+            👤 Perfil
+          </Link>
+          <button onClick={logout}
+            className="text-sm text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100">
+            Salir
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-4">
