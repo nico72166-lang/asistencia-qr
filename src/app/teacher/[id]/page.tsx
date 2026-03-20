@@ -3,6 +3,69 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 
+function SessionCard({ session, groupId }: { session: any, groupId: string }) {
+  const [open, setOpen] = useState(false)
+
+  async function exportExcel() {
+    const { utils, writeFile } = await import('xlsx')
+    const rows = session.attendances.map((a: any) => ({
+      Nombre: a.student.name,
+      Correo: a.student.email,
+      Fecha: new Date(session.date).toLocaleDateString('es-MX'),
+      Estado: 'Presente'
+    }))
+    const ws = utils.json_to_sheet(rows)
+    const wb = utils.book_new()
+    utils.book_append_sheet(wb, ws, 'Asistencia')
+    writeFile(wb, `asistencia-${new Date(session.date).toLocaleDateString('es-MX').replace(/\//g,'-')}.xlsx`)
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div
+        className="p-3 flex items-center justify-between cursor-pointer hover:bg-gray-50"
+        onClick={() => setOpen(!open)}
+      >
+        <div className="text-sm text-gray-900">
+          {new Date(session.date).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+            {session.attendances.length} presentes
+          </span>
+          <span className="text-gray-400 text-xs">{open ? '▲' : '▼'}</span>
+        </div>
+      </div>
+      {open && (
+        <div className="border-t border-gray-100 p-3">
+          {session.attendances.length === 0 ? (
+            <p className="text-gray-400 text-sm text-center py-2">Nadie asistió esta sesión</p>
+          ) : (
+            <div className="space-y-2 mb-3">
+              {session.attendances.map((a: any) => (
+                <div key={a.id} className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-500">✅</span>
+                    <span className="font-medium text-gray-900">{a.student.name}</span>
+                  </div>
+                  <span className="text-gray-400 text-xs">{a.student.email}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={exportExcel}
+            className="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition flex items-center justify-center gap-2"
+          >
+            📊 Exportar a Excel
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+
 export default function GroupPage() {
   const [group, setGroup] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -114,24 +177,17 @@ export default function GroupPage() {
       </div>
 
       <div>
-        <h2 className="text-sm font-medium text-gray-500 mb-3">Historial de sesiones</h2>
-        {group.sessions.length === 0 ? (
-          <div className="text-center py-8 text-gray-400 text-sm">Sin sesiones aún</div>
-        ) : (
-          <div className="space-y-2">
-            {[...group.sessions].reverse().map((s: any) => (
-              <div key={s.id} className="bg-white rounded-xl border border-gray-200 p-3 flex items-center justify-between">
-                <div className="text-sm text-gray-900">
-                  {new Date(s.date).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
-                </div>
-                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                  {s.attendances.length} presentes
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+  <h2 className="text-sm font-medium text-gray-500 mb-3">Historial de sesiones</h2>
+  {group.sessions.length === 0 ? (
+    <div className="text-center py-8 text-gray-400 text-sm">Sin sesiones aún</div>
+  ) : (
+    <div className="space-y-3">
+      {[...group.sessions].reverse().map((s: any) => (
+        <SessionCard key={s.id} session={s} groupId={id} />
+      ))}
+    </div>
+  )}
+</div>
     </main>
   )
 }

@@ -118,7 +118,7 @@ export default function ScanPage() {
           </div>
         ) : (
           <div className="relative">
-            <video ref={videoRef} className="w-full" style={{ maxHeight: '320px', objectFit: 'cover' }} />
+            <video ref={videoRef} autoPlay playsInline muted className="w-full" style={{ height: '320px', objectFit: 'cover', background: '#000' }} />
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="w-52 h-52 border-2 border-white rounded-2xl opacity-70" />
             </div>

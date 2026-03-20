@@ -17,12 +17,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params
 
   const group = await prisma.group.findUnique({
-    where: { id },
-    include: {
-      members: { include: { user: true } },
-      sessions: { include: { attendances: true } }
+  where: { id },
+  include: {
+    members: { include: { user: true } },
+    sessions: {
+      include: {
+        attendances: {
+          include: { student: true }
+        }
+      }
     }
-  })
+  }
+})
 
   return Response.json(group)
 }
