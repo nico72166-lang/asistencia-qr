@@ -45,13 +45,15 @@ export default function StudentPage() {
     }
   }
 
-  async function openGroup(groupId: string) {
-    setLoadingGroup(true)
-    const res = await fetch(`/api/student/groups/${groupId}`)
-    const data = await res.json()
-    setSelectedGroup(data)
-    setLoadingGroup(false)
-  }
+async function openGroup(groupId: string | null) {
+  if (!groupId) { setSelectedGroup(null); return }
+  setLoadingGroup(true)
+  setSelectedGroup({ id: groupId })
+  const res = await fetch(`/api/student/groups/${groupId}`)
+  const data = await res.json()
+  setSelectedGroup(data)
+  setLoadingGroup(false)
+}
 
   async function logout() {
     await fetch('/api/auth/logout', { method: 'POST' })
@@ -107,89 +109,81 @@ export default function StudentPage() {
             Se renueva automáticamente cada 5 minutos
           </p>
         </div>
-
         <div>
-          <h2 className="text-sm font-medium text-gray-500 mb-3">Mis grupos</h2>
-          {groups.length === 0 ? (
-            <div className="text-center py-8 text-gray-400 text-sm">
-              Aún no estás inscrito en ningún grupo
+  <h2 className="text-sm font-medium text-gray-500 mb-3">Mis grupos</h2>
+  {groups.length === 0 ? (
+    <div className="text-center py-8 text-gray-400 text-sm">
+      Aún no estás inscrito en ningún grupo
+    </div>
+  ) : (
+    <div className="space-y-2">
+      {groups.map((g: any) => (
+        <div key={g.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <button onClick={() => openGroup(g.id === selectedGroup?.id ? null : g.id)}
+            className="w-full p-3 flex items-center justify-between hover:bg-gray-50 transition text-left">
+            <div>
+              <div className="text-sm font-medium text-gray-900">{g.name}</div>
+              <div className="text-xs text-gray-500">{g.subject}</div>
             </div>
-          ) : (
-            <div className="space-y-2">
-              {groups.map((g: any) => (
-                <button key={g.id} onClick={() => openGroup(g.id)}
-                  className="w-full bg-white rounded-xl border border-gray-200 p-3 flex items-center justify-between hover:border-gray-300 transition text-left">
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{g.name}</div>
-                    <div className="text-xs text-gray-500">{g.subject}</div>
+            <div className="flex items-center gap-2">
+              <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                g.pct >= 80 ? 'bg-green-100 text-green-800' :
+                g.pct >= 50 ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'}`}>
+                {g.pct}%
+              </span>
+              <span className="text-gray-400 text-xs">
+                {selectedGroup?.id === g.id ? '▲' : '▼'}
+              </span>
+            </div>
+          </button>
+
+          {selectedGroup?.id === g.id && (
+            <div className="border-t border-gray-100 p-3">
+              {loadingGroup ? (
+                <p className="text-gray-400 text-sm text-center py-4">Cargando...</p>
+              ) : (
+                <>
+                  <p className="text-xs text-gray-400 mb-3">
+                    {selectedGroup.members.length} compañeros en este grupo
+                  </p>
+                  <div className="space-y-2">
+                    {selectedGroup.members.map((m: any) => (
+                      <div key={m.id} className={`flex items-center gap-3 p-2.5 rounded-xl ${
+                        m.isMe ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'}`}>
+                        <button onClick={() => m.avatar && setSelectedAvatar(m.avatar)}
+                          className="flex-shrink-0">
+                          {m.avatar ? (
+                            <img src={m.avatar} alt={m.name}
+                              className="w-10 h-10 rounded-full object-cover border border-gray-200 hover:opacity-80 transition" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                              <span className="text-white text-sm font-semibold">
+                                {m.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)}
+                              </span>
+                            </div>
+                          )}
+                        </button>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-gray-900 truncate">{m.name}</div>
+                          {m.isMe && <div className="text-xs text-blue-600">Tú</div>}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                      g.pct >= 80 ? 'bg-green-100 text-green-800' :
-                      g.pct >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'}`}>
-                      {g.pct}%
-                    </span>
-                    <span className="text-gray-400 text-xs">›</span>
-                  </div>
-                </button>
-              ))}
+                </>
+              )}
             </div>
           )}
         </div>
+      ))}
+    </div>
+  )}
+</div>
+        
       </div>
 
-      {/* Modal grupo — compañeros */}
-      {selectedGroup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50"
-          onClick={() => setSelectedGroup(null)}>
-          <div className="bg-white rounded-t-2xl w-full max-w-sm p-5 pb-8"
-            onClick={e => e.stopPropagation()}
-            style={{ maxHeight: '80vh', overflowY: 'auto' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-base font-semibold text-gray-900">{selectedGroup.name}</h3>
-                <p className="text-xs text-gray-500">{selectedGroup.subject}</p>
-              </div>
-              <button onClick={() => setSelectedGroup(null)}
-                className="text-gray-400 hover:text-gray-600 text-xl font-bold">✕</button>
-            </div>
-
-            {loadingGroup ? (
-              <p className="text-center text-gray-400 text-sm py-8">Cargando...</p>
-            ) : (
-              <>
-                <p className="text-xs text-gray-400 mb-3">
-                  {selectedGroup.members.length} compañeros en este grupo
-                </p>
-                <div className="space-y-2">
-                  {selectedGroup.members.map((m: any) => (
-                    <div key={m.id} className={`flex items-center gap-3 p-2.5 rounded-xl ${m.isMe ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'}`}>
-                      <button onClick={() => m.avatar && setSelectedAvatar(m.avatar)}
-                        className="flex-shrink-0">
-                        {m.avatar ? (
-                          <img src={m.avatar} alt={m.name}
-                            className="w-10 h-10 rounded-full object-cover border border-gray-200 hover:opacity-80 transition" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
-                            <span className="text-white text-sm font-semibold">
-                              {m.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)}
-                            </span>
-                          </div>
-                        )}
-                      </button>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-gray-900 truncate">{m.name}</div>
-                        {m.isMe && <div className="text-xs text-blue-600">Tú</div>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      
 
       {/* Modal foto grande */}
       {selectedAvatar && (

@@ -6,4 +6,6 @@ input, textarea, select {
 
 input::placeholder, textarea::placeholder {
   color: #9ca3af !important;
+}main {
+  min-height: 100dvh;
 }
