@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import ThemeToggle from '@/components/ThemeToggle'
 
 export default function TeacherPage() {
   const [groups, setGroups] = useState<any[]>([])
@@ -72,6 +73,7 @@ export default function TeacherPage() {
             <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Docente</span>
           </div>
           <div className="flex gap-2">
+            <ThemeToggle />
             <Link href="/profile"
               className="text-sm text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100">
               👤 Perfil
