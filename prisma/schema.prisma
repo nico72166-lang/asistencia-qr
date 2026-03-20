@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+  
+enum Role {
+  TEACHER
+  STUDENT
+}
+
+model User {
+  id          String        @id @default(cuid())
+  name        String
+  email       String        @unique
+  password    String
+  role        Role          @default(STUDENT)
+  createdAt   DateTime      @default(now())
+  teacherGroups Group[]     @relation("TeacherGroups")
+  memberships GroupMember[]
+  attendances Attendance[]
+  qrToken     QrToken?
+}
+
+model Group {
+  id        String        @id @default(cuid())
+  name      String
+  subject   String
+  level     String        @default("")
+  createdAt DateTime      @default(now())
+  teacherId String
+  teacher   User          @relation("TeacherGroups", fields: [teacherId], references: [id])
+  members   GroupMember[]
+  sessions  Session[]
+}
+
+model GroupMember {
+  id        String   @id @default(cuid())
+  userId    String
+  groupId   String
+  joinedAt  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  group     Group    @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId])
+}
+
+model Session {
+  id          String       @id @default(cuid())
+  date        DateTime     @default(now())
+  groupId     String
+  group       Group        @relation(fields: [groupId], references: [id])
+  attendances Attendance[]
+}
+
+model Attendance {
+  id        String   @id @default(cuid())
+  present   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  studentId String
+  sessionId String
+  student   User     @relation(fields: [studentId], references: [id])
+  session   Session  @relation(fields: [sessionId], references: [id])
+
+  @@unique([studentId, sessionId])
+}
+
+model QrToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  studentId String   @unique
+  student   User     @relation(fields: [studentId], references: [id])
+}
