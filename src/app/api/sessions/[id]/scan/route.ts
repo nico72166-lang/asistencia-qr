@@ -32,9 +32,32 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   })
   if (existing) return Response.json({ error: 'Ya registrado' }, { status: 400 })
 
-  await prisma.attendance.create({
-    data: { studentId: qr.studentId, sessionId: id, present: true }
+// Agregar alumno al grupo si no es miembro todavía
+const session = await prisma.session.findUnique({
+  where: { id },
+  select: { groupId: true }
+})
+
+if (session) {
+  await prisma.groupMember.upsert({
+    where: {
+      userId_groupId: {
+        userId: qr.studentId,
+        groupId: session.groupId
+      }
+    },
+    update: {},
+    create: {
+      userId: qr.studentId,
+      groupId: session.groupId
+    }
   })
+}
+
+// Registrar asistencia
+await prisma.attendance.create({
+  data: { studentId: qr.studentId, sessionId: id, present: true }
+})
 
   return Response.json({ ok: true, student: qr.student.name })
 }
