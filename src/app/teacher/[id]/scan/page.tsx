@@ -27,6 +27,14 @@ export default function ScanPage() {
       const { BrowserMultiFormatReader } = await import('@zxing/browser')
       const reader = new BrowserMultiFormatReader()
 
+      setTimeout(() => {
+  if (videoRef.current) {
+    videoRef.current.style.display = 'none'
+    videoRef.current.offsetHeight
+    videoRef.current.style.display = 'block'
+  }
+}, 500)
+
       const devices = await BrowserMultiFormatReader.listVideoInputDevices()
       if (!devices.length) { setError('No se encontró cámara'); return }
 
@@ -118,7 +126,24 @@ export default function ScanPage() {
           </div>
         ) : (
           <div className="relative">
-            <video ref={videoRef} autoPlay playsInline muted className="w-full" style={{ height: '320px', objectFit: 'cover', background: '#000' }} />
+            <video
+  ref={videoRef}
+  autoPlay
+  playsInline
+  muted
+  className="w-full"
+  style={{
+    height: '320px',
+    objectFit: 'cover',
+    background: '#000',
+    display: 'block',
+    transform: 'scaleX(1)'
+  }}
+  onLoadedMetadata={(e) => {
+    const v = e.target as HTMLVideoElement
+    v.play()
+  }}
+/>
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="w-52 h-52 border-2 border-white rounded-2xl opacity-70" />
             </div>
