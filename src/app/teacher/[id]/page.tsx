@@ -18,7 +18,7 @@ function SessionCard({ session, groupId }: { session: any, groupId: string }) {
         Nombre: m.user.name,
         Correo: m.user.email,
         Fecha: new Date(session.date).toLocaleDateString('es-MX'),
-        Estado: asistio ? '✅ Presente' : '❌ Ausente'
+        Estado: asistio ? 'Presente' : 'Ausente'
       }
     })
 

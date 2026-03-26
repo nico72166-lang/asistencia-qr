@@ -21,6 +21,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const group = await prisma.group.findUnique({
     where: { id },
     include: {
+      teacher: { select: { id: true, name: true, avatar: true } },
       members: {
         include: { user: { select: { id: true, name: true, avatar: true } } }
       }
@@ -33,6 +34,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     id: group.id,
     name: group.name,
     subject: group.subject,
+    teacher: group.teacher,
     members: group.members.map(m => ({
       id: m.userId,
       name: m.user.name,

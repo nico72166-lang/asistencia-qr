@@ -5,6 +5,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 export default function ProfilePage() {
+  const [showCurrent, setShowCurrent] = useState(false)
+  const [showNew, setShowNew] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -219,19 +221,31 @@ export default function ProfilePage() {
                 <div className="space-y-3 mt-3">
                   <div>
                     <label className="block text-sm text-gray-600 mb-1">Contraseña actual</label>
-                    <input type="password" value={currentPassword}
-                      onChange={e => setCurrentPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 text-gray-900"
-                      style={{ fontSize: '16px' }} />
-                  </div>
-                  <div>
+                    <div className="relative">
+                      <input type={showCurrent ? 'text' : 'password'}
+                        value={currentPassword} onChange={e => setCurrentPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
+                        style={{ fontSize: '16px' }} />
+                      <button type="button" onClick={() => setShowCurrent(!showCurrent)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                        {showCurrent ? '🙈' : '👀'}
+                      </button>
+                    </div>
+                    </div>
+                    <div>
                     <label className="block text-sm text-gray-600 mb-1">Nueva contraseña</label>
-                    <input type="password" value={newPassword}
-                      onChange={e => setNewPassword(e.target.value)}
-                      placeholder="Mínimo 6 caracteres"
-                      className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 text-gray-900"
-                      style={{ fontSize: '16px' }} />
+                    <div className="relative">
+                      <input type={showNew ? 'text' : 'password'}
+                        value={newPassword} onChange={e => setNewPassword(e.target.value)}
+                        placeholder="Mínimo 6 caracteres"
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
+                        style={{ fontSize: '16px' }} />
+                      <button type="button" onClick={() => setShowNew(!showNew)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                        {showNew ? '🙈' : '👀'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

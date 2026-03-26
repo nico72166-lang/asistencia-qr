@@ -143,8 +143,33 @@ async function openGroup(groupId: string | null) {
               {loadingGroup ? (
                 <p className="text-gray-400 text-sm text-center py-4">Cargando...</p>
               ) : (
-                <>
-                  <p className="text-xs text-gray-400 mb-3">
+                <>                  
+                  {/* Profesor */}
+                  <div className="mb-3">
+                    <p className="text-xs text-gray-400 mb-2">Profesor</p>
+                    <div className="flex items-center gap-3 p-2.5 rounded-xl bg-blue-50 border border-blue-200">
+                      <button onClick={() => selectedGroup.teacher.avatar && setSelectedAvatar(selectedGroup.teacher.avatar)}
+                        className="flex-shrink-0">
+                        {selectedGroup.teacher.avatar ? (
+                          <img src={selectedGroup.teacher.avatar} alt={selectedGroup.teacher.name}
+                            className="w-10 h-10 rounded-full object-cover border border-gray-200 hover:opacity-80 transition" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                            <span className="text-white text-sm font-semibold">
+                              {selectedGroup.teacher.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)}
+                            </span>
+                          </div>
+                        )}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900 truncate">{selectedGroup.teacher.name}</div>
+                        <div className="text-xs text-blue-600">Profesor</div>
+                      </div>
+                    </div>
+                  </div>
+                      
+                  {/* Compañeros */}
+                  <p className="text-xs text-gray-400 mb-2">
                     {selectedGroup.members.length} compañeros en este grupo
                   </p>
                   <div className="space-y-2">
@@ -171,7 +196,7 @@ async function openGroup(groupId: string | null) {
                       </div>
                     ))}
                   </div>
-                </>
+                </>             
               )}
             </div>
           )}
